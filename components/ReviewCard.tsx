@@ -10,7 +10,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const textToCopy = `${review.title}\n\n${review.content}\n\n- ${review.author}`;
+    // Updated copy format: ONLY Content, NO Author
+    const textToCopy = review.content;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -41,13 +42,13 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
           className={`p-2 rounded-lg transition-colors ${
             copied ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400 hover:text-arsov-blue hover:bg-blue-50'
           }`}
-          title="Kopírovat recenzi"
+          title="Kopírovat pouze text recenze"
         >
           {copied ? <Check size={18} /> : <Copy size={18} />}
         </button>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{review.title}</h3>
+      {/* Title removed as requested */}
       <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
         {review.content}
       </p>
