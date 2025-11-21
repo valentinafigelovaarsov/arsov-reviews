@@ -11,7 +11,7 @@ const App: React.FC = () => {
     productUrl: '',
     reviewCount: 3,
     tone: ReviewTone.ENTHUSIASTIC,
-    length: ReviewLength.MEDIUM // Changed default to MEDIUM
+    length: ReviewLength.MEDIUM // Default set to MEDIUM as requested
   });
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -79,7 +79,7 @@ const App: React.FC = () => {
   };
 
   const copyAllReviews = () => {
-    // Updated copy logic: Only content, separated by newlines
+    // Updated copy logic: Only content, separated by newlines, NO authors, NO titles
     const allText = reviews.map(r => r.content).join('\n\n');
     navigator.clipboard.writeText(allText);
     alert("Všechny recenze (pouze text) zkopírovány do schránky!");
