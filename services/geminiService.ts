@@ -86,16 +86,17 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
     const generationModel = "gemini-2.5-flash";
     const lengthInstruction = getLengthInstruction(length);
     
-    // Special rules only apply if generating enough reviews to allow variety
+    // Special rules enforce strict styles based on index
     const specialFormattingRules = reviewCount >= 3 ? `
-      8. POVINNÉ FORMATOVÁNÍ PRO TUTO DÁVKU (KRITICKÉ):
-         Vzhledem k tomu, že generuješ ${reviewCount} recenzí, musíš zajistit tuto pestrost:
-         - 1x Recenze S EMOJI: Alespoň jedna recenze MUSÍ obsahovat emoji (např. ❤️, 🙏, ✨, 😍), aby působila jako z Instagramu.
-         - 1x Recenze BEZ DIAKRITIKY: Alespoň jedna recenze MUSÍ být napsána kompletně "bez hacku a carek" (např. "uzasny produkt, vlasy jsou hebke"), jako když někdo píše v rychlosti na mobilu nebo starší klávesnici.
-         - Zbytek recenzí napiš standardní spisovnou češtinou.
+      8. POVINNÉ ROZDĚLENÍ STYLŮ (DŮLEŽITÉ - MUSÍŠ DODRŽET):
+         Generuješ ${reviewCount} recenzí. Aby vypadaly autenticky, musíš každou napsat jiným stylem podle tohoto pořadí:
+         
+         - 1. RECENZE (Insta-Style): MUSÍ obsahovat emoji (např. 😍, ✨, ❤️, 🙏). Použij alespoň 2-3 smajlíky v textu. Toto je kritické.
+         - 2. RECENZE (Raw Style): MUSÍ být napsána úplně BEZ DIAKRITIKY (např. "uzasna vune, vlasy jsou hebke, urcite doporucuju"). Simuluj psaní na mobilu.
+         - 3. RECENZE a další: Standardní, spisovná, autentická čeština bez přehnaných emotikonů.
     ` : `
       8. FORMATOVÁNÍ:
-         - Piš standardní češtinou. Občas můžeš použít emoji, ale nepřeháněj to.
+         - Piš standardní češtinou. Občas můžeš použít emoji (nepřeháněj to).
     `;
 
     const prompt = `
@@ -117,7 +118,7 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
       5. EXTRÉMNÍ VARIABILITA (KRITICKÉ):
          - Každá z ${reviewCount} recenzí MUSÍ být naprosto odlišná.
          - POHLAVÍ: Pokud je produkt unisex, MUSÍŠ střídat muže a ženy. Pokud je pro ženy, střídej aspoň věk/styl vyjadřování.
-         - ZÁKAZ OPAKOVÁNÍ: NIKDY negeneruj 2 recenze po sobě, které znějí stejně (např. 2x za sebou muž, který filozofuje o vůni). 
+         - ZÁKAZ OPAKOVÁNÍ: NIKDY negeneruj 2 recenze po sobě, které znějí stejně.
          - STŘÍDEJ STYL PISATELE:
              * Pisatel A: Pragmatický, řeší výsledek, stručnější věty.
              * Pisatel B: Emotivní, řeší pocity ("cítím se skvěle"), delší souvětí.
@@ -138,7 +139,7 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
       model: generationModel,
       contents: prompt,
       config: {
-        temperature: 1.15, // Slightly higher temperature for more creativity with diacritics/emojis
+        temperature: 1.15, 
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
@@ -147,7 +148,7 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
             properties: {
               author: { type: Type.STRING, description: "České jméno zákazníka (Dodrž pravidlo unikátnosti)" },
               rating: { type: Type.INTEGER, description: "Počet hvězdiček (vždy 5)" },
-              content: { type: Type.STRING, description: "Text recenze (bez nadpisu)" },
+              content: { type: Type.STRING, description: "Text recenze. Pokud je to styl s emoji, musí obsahovat emoji znaky." },
               productName: { type: Type.STRING, description: "Název produktu (z analýzy)" } 
             },
             required: ["author", "rating", "content", "productName"],
