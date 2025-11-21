@@ -4,9 +4,6 @@ import { Review, ReviewFormData, ProductAnalysis, ReviewLength } from "../types"
 // Helper to safely get AI instance or throw readable error
 const getAI = () => {
   const key = process.env.API_KEY;
-  if (!key || key.includes("AIzaSyD1ZlyX9d7E")) { // Check if key is missing or if it's the placeholder/invalid one
-     // Note: We check for the specific partial key user pasted to prevent using a broken key
-  }
   
   if (!key) {
     throw new Error("CHYBA: Chybí API klíč (API_KEY) v nastavení Vercel.");
@@ -121,7 +118,7 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
          - Pravidlo: NESMÍŠ vygenerovat autora se stejným CELÝM JMÉNEM (křestní + příjmení), které je v tomto seznamu.
          - Křestní jména se mohou opakovat. Příjmení se mohou opakovat. Ale NIKDY se nesmí opakovat celá kombinace.
       
-      Formát výstupu: JSON pole objektů.
+      Formát výstupu: JSON pole objektů (bez nadpisu, pouze obsah a autor).
     `;
 
     const response = await ai.models.generateContent({
@@ -137,11 +134,10 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
             properties: {
               author: { type: Type.STRING, description: "České jméno zákazníka (Dodrž pravidlo unikátnosti)" },
               rating: { type: Type.INTEGER, description: "Počet hvězdiček (vždy 5)" },
-              title: { type: Type.STRING, description: "Úderný nadpis recenze" },
-              content: { type: Type.STRING, description: "Text recenze" },
+              content: { type: Type.STRING, description: "Text recenze (bez nadpisu)" },
               productName: { type: Type.STRING, description: "Název produktu (z analýzy)" } 
             },
-            required: ["author", "rating", "title", "content", "productName"],
+            required: ["author", "rating", "content", "productName"],
           },
         },
       },
