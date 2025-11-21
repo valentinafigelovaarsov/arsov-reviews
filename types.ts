@@ -1,6 +1,5 @@
 export interface Review {
   author: string;
-  title: string;
   content: string;
   rating: number;
   productName: string;
