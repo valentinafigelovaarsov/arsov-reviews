@@ -11,7 +11,7 @@ const App: React.FC = () => {
     productUrl: '',
     reviewCount: 3,
     tone: ReviewTone.ENTHUSIASTIC,
-    length: ReviewLength.LONG
+    length: ReviewLength.MEDIUM // Changed default to MEDIUM
   });
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -64,9 +64,11 @@ const App: React.FC = () => {
           localStorage.setItem('arsov_used_names', JSON.stringify(uniqueNames));
       }, 500);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setStatus({ isLoading: false, stage: 'idle', error: "Chyba při generování. Zkontrolujte URL nebo to zkuste znovu.", success: false });
+      // Show the real error message from the service/API to help debugging
+      const errorMessage = error instanceof Error ? error.message : "Neznámá chyba";
+      setStatus({ isLoading: false, stage: 'idle', error: errorMessage, success: false });
     }
   };
 
@@ -77,9 +79,10 @@ const App: React.FC = () => {
   };
 
   const copyAllReviews = () => {
-    const allText = reviews.map(r => `Produkt: ${r.productName}\nAutor: ${r.author} (${r.rating}*)\n${r.title}\n${r.content}\n---`).join('\n\n');
+    // Updated copy logic: Only content, separated by newlines
+    const allText = reviews.map(r => r.content).join('\n\n');
     navigator.clipboard.writeText(allText);
-    alert("Všechny recenze zkopírovány do schránky!");
+    alert("Všechny recenze (pouze text) zkopírovány do schránky!");
   };
 
   // --- RENDER MAIN APP ---
