@@ -86,6 +86,18 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
     const generationModel = "gemini-2.5-flash";
     const lengthInstruction = getLengthInstruction(length);
     
+    // Special rules only apply if generating enough reviews to allow variety
+    const specialFormattingRules = reviewCount >= 3 ? `
+      8. POVINNÉ FORMATOVÁNÍ PRO TUTO DÁVKU (KRITICKÉ):
+         Vzhledem k tomu, že generuješ ${reviewCount} recenzí, musíš zajistit tuto pestrost:
+         - 1x Recenze S EMOJI: Alespoň jedna recenze MUSÍ obsahovat emoji (např. ❤️, 🙏, ✨, 😍), aby působila jako z Instagramu.
+         - 1x Recenze BEZ DIAKRITIKY: Alespoň jedna recenze MUSÍ být napsána kompletně "bez hacku a carek" (např. "uzasny produkt, vlasy jsou hebke"), jako když někdo píše v rychlosti na mobilu nebo starší klávesnici.
+         - Zbytek recenzí napiš standardní spisovnou češtinou.
+    ` : `
+      8. FORMATOVÁNÍ:
+         - Piš standardní češtinou. Občas můžeš použít emoji, ale nepřeháněj to.
+    `;
+
     const prompt = `
       Jsi špičkový copywriter pro značku Tomas Arsov.
       
@@ -117,6 +129,7 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
          - V databázi už máme tato jména: ${JSON.stringify(excludedNames.slice(-200))}.
          - Pravidlo: NESMÍŠ vygenerovat autora se stejným CELÝM JMÉNEM (křestní + příjmení), které je v tomto seznamu.
          - Křestní jména se mohou opakovat. Příjmení se mohou opakovat. Ale NIKDY se nesmí opakovat celá kombinace.
+      ${specialFormattingRules}
       
       Formát výstupu: JSON pole objektů (bez nadpisu, pouze obsah a autor).
     `;
@@ -125,7 +138,7 @@ export const generateReviews = async (formData: ReviewFormData, excludedNames: s
       model: generationModel,
       contents: prompt,
       config: {
-        temperature: 1.1, // Increased temperature for even more randomness
+        temperature: 1.15, // Slightly higher temperature for more creativity with diacritics/emojis
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
